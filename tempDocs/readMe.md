@@ -1,3 +1,9 @@
+<img src="https://github.com/user-attachments/assets/d81dec13-1a98-46ea-9001-9fdc5b40648b" alt="image" width="100%" />
+
+
+
+
+```
 Maze size: 4
 Press s to start simulation
   1  0  1  2
@@ -123,5 +129,7 @@ FORWARD
   8  1  4  3
   7  2  3  6
   6  5  4  5
-
+```
 FORWARD
+
+```
