@@ -1,4 +1,6 @@
 #include "solver.h"
+#include "include/queue.h"
+#include "include/stack.h"
 #include "mouse.h"
 
 // This function redirects function calls from mouse.c to the desired maze
@@ -6,20 +8,16 @@
 
 Action solver(Mouse *mouse) {
 
-  Action mazeSolvedPath[4] = {RIGHT, FORWARD, FORWARD, LEFT};
-  return pathSolved(mazeSolvedPath, 4);
+  return floodFill(mouse);
 }
 
 // Simple algorithm; mouse goes straight until encountering a wall, then
 // preferentially turns left
 
-int counter = -1;
-Action pathSolved(Action directions[], size_t size) {
-  counter++;
-  if (counter >= size)
-    return IDLE;
-  return directions[counter];
-}
+Action pathSolved(NodeStack ** stack) {
+  pop(stack);
+  return (*stack)->action;
+};
 
 Action obstacleAvoider(Mouse *mouse) {
   if (getFrontReading(mouse) == 0)
@@ -47,73 +45,11 @@ Action leftWallFollower(Mouse *mouse) {
     return RIGHT;
 }
 
-typedef struct Node {
-  int x, y, distance;
-  struct Node *next;
-} Node;
-
 typedef struct Cell {
   int distance;
   int N, S, W, E;
   int visited;
 } Cell;
-
-typedef struct {
-  Node *front, *rear;
-} Queue;
-
-Node *createNode(int x, int y) {
-  Node *newCell = (Node *)malloc(sizeof(Node));
-  if (newCell == NULL)
-    return NULL;
-  newCell->x = x;
-  newCell->y = y;
-  newCell->next = NULL;
-  return newCell;
-};
-
-Queue *initQueue() {
-  Queue *newQueue = (Queue *)malloc(sizeof(Queue));
-  newQueue->front = newQueue->rear = NULL;
-  return newQueue;
-}
-
-int isEmpty(Queue *q) { return q->front == NULL; }
-
-void enqueue(Queue *q, int x, int y) {
-  Node *newCell = createNode(x, y);
-  if (!newCell) {
-    printf("Queue overflow");
-    return;
-  }
-  if (q->rear == NULL) {
-    q->front = q->rear = newCell;
-    return;
-  }
-  q->rear->next = newCell;
-  q->rear = newCell;
-}
-
-Node *dequeue(Queue *q) {
-  if (isEmpty(q)) {
-    printf("Queue underflow\n");
-    return NULL;
-  }
-  Node *temp = q->front;
-  q->front = q->front->next;
-  if (q->front == NULL)
-    q->rear = NULL;
-  return temp;
-}
-
-void traverse(Queue *q) {
-  Node *current = q->front;
-  while (current != NULL) {
-    printf("(%d, %d) ", current->x, current->y);
-    current = current->next;
-  }
-  printf("NULL\n");
-}
 
 void printMaze(Cell maze[16][16], int size) {
   for (int x = size - 1; x >= 0; x--) {
@@ -127,7 +63,7 @@ void printMaze(Cell maze[16][16], int size) {
 Cell decMaze[16][16]; // y, x
 int lastPosition[2] = {-1, -1};
 int lastHeading = NORTH;
-Action finalPath = {};
+NodeStack *finalPath = NULL;
 
 Action floodFill(Mouse *mouse) {
   int newCell = lastPosition[0] != mouse->x || lastPosition[1] != mouse->y;
@@ -368,7 +304,10 @@ Action floodFill(Mouse *mouse) {
       printf("IDLE\n");
       break;
     }
+    push(&finalPath, bestAction);
+    printStack(&finalPath);
     return bestAction;
   }
   return IDLE;
+  // return pathSolved(&finalPath);
 }
