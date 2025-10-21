@@ -18,8 +18,8 @@ int loadMaze(Maze *maze, const char *path)
     // File loading variables
     FILE *file;
     char *buffer = (char *) malloc(64);;
-    char *filePath[100] = {0};
-    int lineLength = 0;
+    char filePath[100] = {0};
+    size_t lineLength = 0;
     int mazeSize = 0;
 
     // Load specified maze file or default one if NULL path provided
@@ -79,7 +79,15 @@ int loadMaze(Maze *maze, const char *path)
         vCounter = 0;
         for(int j = 2; j <= 2*mazeSize - 1; j += 2)
         {
+          // TODO: ReWrite.
             if(vBuff[j] == 'x') v_walls[i][vCounter] = 1;
+            if(vBuff[j - 1] == 'o') {
+              maze->finish_pos[0] = (j-2)/2; 
+              maze->finish_pos[1] = mazeSize -1 - i;
+            } else if(vBuff[j + 1] == 'o') {
+              maze->finish_pos[0] = j/2; 
+              maze->finish_pos[1] = mazeSize -1 - i;
+            }
             vCounter++;
         }
 
@@ -97,9 +105,15 @@ int loadMaze(Maze *maze, const char *path)
     for(int i = 2; i <= 2*mazeSize - 1; i += 2)
     {
         if(vBuff[i] == 'x') v_walls[mazeSize - 1][vCounter] = 1;
+        if(vBuff[i - 1] == 'o') {
+          maze->finish_pos[0] = (i-2)/2; 
+          maze->finish_pos[1] = 0;
+        } else if(vBuff[i + 1] == 'o') {
+              maze->finish_pos[0] = (i-2)/2; 
+              maze->finish_pos[1] = 0;
+            }
         vCounter++;
     }
-
     // Free temporary buffers
     free(buffer);
     free(hBuff);

@@ -10,6 +10,7 @@ typedef struct
     SDL_Texture* mazeTexture;
     int hWalls [17][16];
     int vWalls [16][17];
+    int finish_pos[2];
 } Maze;
 
 int loadMaze(Maze* maze, const char *path);
